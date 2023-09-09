@@ -3,113 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion-Based Playlist Tool</title>
+    <title>Text Editor Tool</title>
     <style>
         /* Add your CSS styles here for styling */
     </style>
 </head>
 <body>
-    <h1>Emotion-Based Playlist Tool</h1>
+    <h1>Text Editor Tool</h1>
     <div>
-        <label for="songInput">Song:</label>
-        <input type="text" id="songInput" placeholder="Enter song name">
+        <label for="textInput">Enter Text:</label>
+        <textarea id="textInput" rows="4" cols="50" placeholder="Type your text here"></textarea>
     </div>
-    <div>
-        <label for="artistInput">Artist:</label>
-        <input type="text" id="artistInput" placeholder="Enter artist name">
-    </div>
-    <div>
-        <label for="tagInput">Tags (comma-separated):</label>
-        <input type="text" id="tagInput" placeholder="e.g., happy, sad">
-    </div>
-    <button onclick="storeSong()">Store Song</button>
+    <button onclick="saveText()">Save Text</button>
 
-    <h2>Filter Playlist</h2>
-    <div>
-        <label for="filterTags">Filter by Tags:</label>
-        <input type="text" id="filterTags" placeholder="Enter tags">
+    <h2>Stored Text:</h2>
+    <div id="storedText">
+        <!-- The stored text will be displayed here -->
     </div>
-    <button onclick="filterPlaylist()">Filter Playlist</button>
-
-    <h2>Playlist</h2>
-    <ul id="playlist">
-        <!-- The filtered playlist will be displayed here -->
-    </ul>
 
     <script>
-        // Fetch the song data from the JSON file
-        async function fetchSongData() {
-            try {
-                const response = await fetch('songs.json');
-                const data = await response.json();
-                return data || [];
-            } catch (error) {
-                console.error('Error fetching song data:', error);
-                return [];
-            }
-        }
+        // Function to save text to a file
+        async function saveText() {
+            const text = document.getElementById("textInput").value;
 
-        // Update the song data in the JSON file
-        async function updateSongData(songs) {
-            try {
-                await fetch('songs.json', {
-                    method: 'PUT', // Use 'PUT' to update the file
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(songs),
-                });
-            } catch (error) {
-                console.error('Error updating song data:', error);
-            }
-        }
-
-        // Store song data in the JSON file
-        async function storeSong() {
-            const song = document.getElementById("songInput").value;
-            const artist = document.getElementById("artistInput").value;
-            const tags = document.getElementById("tagInput").value.split(",").map(tag => tag.trim());
-
-            if (!song || !artist || tags.length === 0) {
-                alert("Please enter song, artist, and at least one tag.");
+            if (!text) {
+                alert("Please enter text.");
                 return;
             }
 
-            const songs = await fetchSongData();
-            songs.push({ song, artist, tags });
-            updateSongData(songs);
-
-            // Clear input fields
-            document.getElementById("songInput").value = "";
-            document.getElementById("artistInput").value = "";
-            document.getElementById("tagInput").value = "";
-        }
-
-        // Filter and display the playlist based on tags
-        async function filterPlaylist() {
-            const filterTags = document.getElementById("filterTags").value.split(",").map(tag => tag.trim());
-            const songs = await fetchSongData();
-
-            const filteredSongs = songs.filter(song => {
-                return filterTags.every(filterTag => song.tags.includes(filterTag));
-            });
-
-            const playlist = document.getElementById("playlist");
-            playlist.innerHTML = "";
-
-            if (filteredSongs.length === 0) {
-                playlist.innerHTML = "<li>No matching songs found.</li>";
-            } else {
-                filteredSongs.forEach(song => {
-                    const listItem = document.createElement("li");
-                    listItem.textContent = `${song.song} by ${song.artist}`;
-                    playlist.appendChild(listItem);
+            try {
+                await fetch('saveText.txt', {
+                    method: 'PUT', // Use 'PUT' to update the file
+                    body: text,
                 });
+                alert("Text saved successfully!");
+                document.getElementById("textInput").value = ""; // Clear the input
+            } catch (error) {
+                console.error('Error saving text:', error);
             }
         }
 
-        // Initial load of the playlist
-        filterPlaylist();
+        // Function to reveal and display the stored text
+        async function revealText() {
+            try {
+                const response = await fetch('saveText.txt');
+                const text = await response.text();
+                document.getElementById("storedText").textContent = text;
+            } catch (error) {
+                console.error('Error fetching text:', error);
+            }
+        }
+
+        // Initially reveal any existing stored text when the page loads
+        revealText();
     </script>
 </body>
 </html>
