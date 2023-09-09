@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor Tool</title>
+    <style>
+        /* Add your CSS styles here for styling */
+    </style>
+</head>
+<body>
+    <h1>Text Editor Tool</h1>
+    <div>
+        <label for="textInput">Enter Text:</label>
+        <textarea id="textInput" rows="4" cols="50" placeholder="Type your text here"></textarea>
+    </div>
+    <button onclick="saveText()">Save Text</button>
+
+    <h2>Stored Text:</h2>
+    <div id="storedText">
+        <!-- The stored text will be displayed here -->
+    </div>
+
+    <script>
+        // Function to save text to a file
+        async function saveText() {
+            const text = document.getElementById("textInput").value;
+
+            if (!text) {
+                alert("Please enter text.");
+                return;
+            }
+
+            try {
+                await fetch('saveText.txt', {
+                    method: 'PUT', // Use 'PUT' to update the file
+                    body: text,
+                });
+                alert("Text saved successfully!");
+                document.getElementById("textInput").value = ""; // Clear the input
+            } catch (error) {
+                console.error('Error saving text:', error);
+            }
+        }
+
+        // Function to reveal and display the stored text
+        async function revealText() {
+            try {
+                const response = await fetch('saveText.txt');
+                const text = await response.text();
+                document.getElementById("storedText").textContent = text;
+            } catch (error) {
+                console.error('Error fetching text:', error);
+            }
+        }
+
+        // Initially reveal any existing stored text when the page loads
+        revealText();
+    </script>
+</body>
+</html>
